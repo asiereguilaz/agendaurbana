@@ -1,2 +1,41 @@
 indicador 02 -
 - descripción del indicador
+
+
+
+create table indicador32_33_vs as
+
+SELECT 
+  t2.cusec3 as cusec3_11,
+	t1.cusec,
+	t1.nmun,
+	COALESCE(t2.vivienda, 0) as vivienda_11,
+	COALESCE(t1.t18_1, 0) as vivienda_21,
+	COALESCE(t2.hogar, 0) as hogar_11,
+	COALESCE(t1.t21_1, 0) as hogar_21,
+	ROUND(
+	    CASE
+	        WHEN COALESCE(t2.hogar, 0) = 0 THEN 0  -- Para evitar división por cero
+	        ELSE ((COALESCE(t1.t21_1, 0) - COALESCE(t2.hogar, 0)) / COALESCE(t2.hogar, 0)) * 100
+	    END, 
+	    2
+	) AS d32_porcentaje,
+	(COALESCE(t1.t21_1, 0) - COALESCE(t2.hogar, 0)) as d32_numero,
+	ROUND(
+	    CASE
+	        WHEN COALESCE(t2.vivienda, 0) = 0 THEN 0  -- Para evitar división por cero
+	        ELSE ((COALESCE(t1.t18_1, 0) - COALESCE(t2.vivienda, 0)) / COALESCE(t2.vivienda, 0)) * 100
+	    END, 
+	    2
+	) AS d33_porcentaje,
+	(COALESCE(t1.t18_1, 0) - COALESCE(t2.vivienda, 0)) as d33_numero,
+	t1.geom
+FROM 
+    "Censo_2021_SSCC" AS t1
+FULL JOIN 
+    public.villanueva_sscc2011 AS t2 ON t1.cusec3 = t2.cusec3_202
+WHERE
+    t1.nmun = 'Villanueva de la Serena'
+ORDER BY 
+    t1.cusec3 ASC;
+
